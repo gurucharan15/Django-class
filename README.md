@@ -71,6 +71,7 @@ venv\Scripts\activate
 # source venv/bin/activate
 
 # 3. Install Django framework and required drivers
+pip install django
 pip install django mysqlclient
 
 # 4. Create the root Django project
