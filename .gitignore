@@ -14,3 +14,7 @@ venv.bak/
 
 # Pyright
 pyrightconfig.json
+
+# Presentation notes
+PRESENTATION_TOPICS_EXPLAINED.md
+
