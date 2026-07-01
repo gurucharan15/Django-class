@@ -4,6 +4,9 @@
 
 > 📘 **Looking for topic-by-topic slide explanations and trainer speaking notes?**  
 > Check out the complete companion guide: **[`PRESENTATION_TOPICS_EXPLAINED.md`](file:///d:/Django/PRESENTATION_TOPICS_EXPLAINED.md)**!
+> 
+> 📝 **Want a line-by-line breakdown of every file and WHY we wrote each code block?**  
+> Check out the code walkthrough guide: **[`createfile.md`](file:///d:/Django/createfile.md)**!
 
 ---
 
