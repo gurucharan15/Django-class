@@ -1,3 +1,4 @@
+# python manage.py migrate --database=mysql_db
 # 📚 Complete Guide & Chronological Walkthrough: Django Multi-Database Setup & Demonstration
 
 This document provides a comprehensive, step-by-step explanation of everything we accomplished today. It covers **what code we wrote and why**, **what commands we ran and why**, and how Django manages multiple databases (SQLite and MySQL) simultaneously.
