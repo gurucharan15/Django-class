@@ -3,9 +3,8 @@ from .models import Student
 
 def home(request):
 
-    # Querying from MySQL database ('mysql_db')
+    # Querying from SQLite3 database ('default')
     student_objects = Student.objects.all()
-    # student_objects = Student.objects.using('mysql_db').all()
 
 
     data = {
