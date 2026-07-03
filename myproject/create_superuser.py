@@ -27,7 +27,7 @@ def create_admin():
     # 1. Check and create in default database (SQLite)
     try:
         if not User.objects.using('default').filter(username=username).exists():
-            User.objects.using('default').create_superuser(username=username, email=email, password=password)
+            User.objects.db_manager('default').create_superuser(username=username, email=email, password=password)
             print(f"[+] Superuser '{username}' created successfully in 'default' (SQLite) database!")
             print(f"    -> Login Username: {username}")
             print(f"    -> Login Password: {password}")
@@ -41,7 +41,7 @@ def create_admin():
         conn = connections['mysql_db']
         conn.ensure_connection()
         if not User.objects.using('mysql_db').filter(username=username).exists():
-            User.objects.using('mysql_db').create_superuser(username=username, email=email, password=password)
+            User.objects.db_manager('mysql_db').create_superuser(username=username, email=email, password=password)
             print(f"[+] Superuser '{username}' created successfully in 'mysql_db' (MySQL) database!")
         else:
             print(f"[*] Superuser '{username}' already exists in 'mysql_db' database.")
