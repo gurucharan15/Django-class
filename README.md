@@ -232,4 +232,17 @@ By default, this repository uses SQLite (`db.sqlite3`) for instant zero-configur
    ```
 
 ---
+
+## 🌐 6. Cloud Deployment & Automatic Superuser (Render)
+This repository is 100% production-ready for instant deployment on **[Render.com](https://render.com/)**!
+* **1-Click Blueprint:** Includes a preconfigured [`render.yaml`](file:///d:/Django/render.yaml) and [`build.sh`](file:///d:/Django/myproject/build.sh) for zero-setup deployments with Gunicorn and WhiteNoise.
+* **Automatic Admin Superuser:** Because Render Free Tier instances do not provide persistent interactive shell access and reset ephemeral SQLite files on restart, our automated script ([`myproject/create_superuser.py`](file:///d:/Django/myproject/create_superuser.py)) automatically checks and generates an admin account whenever your app deploys or boots up!
+  * **Default Username:** `admin`
+  * **Default Password:** `admin123`
+  *(Can be customized via `ADMIN_USERNAME` and `ADMIN_PASSWORD` environment variables in your Render Dashboard).*
+
+> 📖 **Want the step-by-step deployment and troubleshooting guide?**  
+> Check out: **[`RENDER_DEPLOYMENT_GUIDE.md`](file:///d:/Django/RENDER_DEPLOYMENT_GUIDE.md)**!
+
+---
 *Created for Django Full-Stack Web Development Training by GuruCharan Tanneeru.*

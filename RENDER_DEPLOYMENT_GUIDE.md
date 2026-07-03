@@ -18,6 +18,7 @@ To make your Django app production-ready for Render without breaking local devel
 
 ### 1️⃣ Updated `settings.py` ([myproject/myproject/settings.py](file:///d:/Django/myproject/myproject/settings.py))
 * **`ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '.onrender.com', '*']`**: In production, Django blocks requests from unrecognized domain names for security. Adding `.onrender.com` and `*` ensures Render can route web traffic to your app without throwing a `DisallowedHost` error.
+* **`CSRF_TRUSTED_ORIGINS = ['https://*.onrender.com', ...]`**: Required by Django 4.0+ when logging into the Admin site over HTTPS. Without this, submitting login forms on Render throws a `403 Forbidden: CSRF verification failed` error!
 * **`WhiteNoiseMiddleware`**: Added `'whitenoise.middleware.WhiteNoiseMiddleware'` directly below `SecurityMiddleware`. By default, Django does not serve CSS/JS static files in production. WhiteNoise intercepts requests for `/static/...` and serves compressed, optimized static files directly from Python!
 * **`STATIC_ROOT & Storage`**: Added `STATIC_ROOT = BASE_DIR / 'staticfiles'` and configured `CompressedManifestStaticFilesStorage` so the `python manage.py collectstatic` command can bundle all CSS/JS files into one clean production folder.
 
@@ -35,7 +36,15 @@ whitenoise>=6.6.0
 We added an Infrastructure-as-Code blueprint file. When Render reads this YAML file, it automatically configures the web service name, Python runtime version, build command, and start command for you!
 
 ### 4️⃣ Created `build.sh` Script ([myproject/build.sh](file:///d:/Django/myproject/build.sh))
-A clean shell script that automates dependencies installation and static file collection during Render's build phase.
+A clean shell script that automates dependencies installation, database migrations, static file collection, and superuser generation during Render's build phase.
+
+### 5️⃣ Created Automatic Superuser Script ([myproject/create_superuser.py](file:///d:/Django/myproject/create_superuser.py)) ⭐
+On Render Free Tier, interactive SSH/Shell access is restricted or temporary, and ephemeral SQLite files reset whenever the server restarts.
+To ensure **Free Tier users never need terminal access to create an admin user**, we automated it!
+Every time your container starts or deploys, this script runs automatically:
+* **Default Admin Username:** `admin`
+* **Default Admin Password:** `admin123`
+*(You can override these anytime by setting `ADMIN_USERNAME` and `ADMIN_PASSWORD` environment variables in your Render Dashboard!)*
 
 ---
 
@@ -75,11 +84,11 @@ If you prefer configuring things manually:
    * **Root Directory:** `myproject` *(Important! Since `manage.py` and `wsgi.py` live inside the `myproject` folder)*
    * **Build Command:**
      ```bash
-     pip install -r requirements.txt && python manage.py collectstatic --no-input
+     pip install -r requirements.txt && python manage.py collectstatic --no-input && python manage.py migrate && python create_superuser.py
      ```
    * **Start Command:**
      ```bash
-     gunicorn myproject.wsgi:application
+     python manage.py migrate && python create_superuser.py && gunicorn myproject.wsgi:application
      ```
 4. Click **"Create Web Service"**.
 
@@ -88,7 +97,7 @@ If you prefer configuring things manually:
 ## 🐬 Database Configuration on Render
 
 ### 1. What happens to SQLite (`db.sqlite3`)?
-On Render's Free tier, the web server filesystem is transient (stateless). This means if you use SQLite, your database will reset whenever Render restarts your app or pushes a new update.
+On Render's Free tier, the web server filesystem is transient (stateless). This means if you use SQLite, your database will reset whenever Render restarts your app or pushes a new update. **However, thanks to our automatic script (`create_superuser.py`), your admin account (`admin` / `admin123`) is automatically recreated every time the app wakes up!**
 
 ### 2. Why Your Remote Hostinger MySQL Database is Perfect! 🌟
 Because your MySQL database (`test_testdb`) is hosted remotely on Hostinger or cPanel, your Render web service will connect to it over the internet!
@@ -102,6 +111,8 @@ Because your MySQL database (`test_testdb`) is hosted remotely on Hostinger or c
 | Error Message | Cause & Solution |
 | :--- | :--- |
 | **`DisallowedHost at /`** | Django blocked the URL. **Solution:** Ensure `'.onrender.com'` or `'*'` is inside `ALLOWED_HOSTS` in `settings.py`. |
+| **`403 Forbidden: CSRF verification failed`** | You logged into `/admin/` over HTTPS without trusting the domain. **Solution:** Ensure `CSRF_TRUSTED_ORIGINS = ['https://*.onrender.com']` is in `settings.py`. |
+| **Cannot log into Admin / Invalid credentials** | No superuser exists on Render cloud DB. **Solution:** Our `create_superuser.py` script automatically creates `admin` / `admin123` on boot! |
 | **`ModuleNotFoundError: No module named 'gunicorn'`** | Gunicorn was not installed. **Solution:** Ensure `requirements.txt` contains `gunicorn>=21.2.0`. |
 | **`OperationalError: (2003, "Can't connect to MySQL server...")`** | Your remote database host (Hostinger) blocked Render's IP. **Solution:** Go to Hostinger ➔ Remote MySQL ➔ Whitelist `%` (All IPs). |
 | **`No static files found` / Missing CSS** | Static files weren't collected. **Solution:** Verify `whitenoise` is in `MIDDLEWARE` and `python manage.py collectstatic` is in your Build Command. |
